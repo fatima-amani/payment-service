@@ -18,8 +18,8 @@ public class Payment {
     private Long userId;
     private String paymentMethod; // "METRO_CARD" or "QR_TICKET"
     private double amount;
-    private String source;
-    private String destination;
+    private Integer source;
+    private Integer destination;
     private LocalDateTime paymentTime;
 }
 
