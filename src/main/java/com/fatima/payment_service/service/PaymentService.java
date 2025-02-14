@@ -29,7 +29,7 @@ public class PaymentService {
 
     private static final double PEAK_HOUR_INCREASE = 0.20;
     private static final double METRO_CARD_DISCOUNT = 0.1;
-    private static final int PENALTY_TIME_LIMIT = 90; // in minutes
+    private static final int PENALTY_TIME_LIMIT = 90;
 
     public Payment processQRPayment(Long userId, Integer sourceId, Integer destinationId, LocalDateTime issueTime) {
         double finalFare = isPeakHour(issueTime) ? getPeakHourFare(sourceId, destinationId) : getBaseFare(sourceId, destinationId);
@@ -40,12 +40,12 @@ public class PaymentService {
         payment.setAmount(finalFare);
         payment.setSource(sourceId);
         payment.setDestination(destinationId);
-        payment.setPaymentTime(LocalDateTime.now()); // Ensure the time is stored correctly
+        payment.setPaymentTime(LocalDateTime.now());
 
-        Payment savedPayment = paymentRepository.save(payment); // Persist to DB
+        Payment savedPayment = paymentRepository.save(payment);
 
         kafkaTemplate.send("ticket_payment_success", new PaymentSuccessEvent(userId, finalFare, "QR_TICKET", sourceId, destinationId));
-        return savedPayment; // Return the saved payment (with ID)
+        return savedPayment;
     }
 
     public Payment processMetroCardPayment(Long userId, Integer sourceId, Integer destinationId, LocalDateTime checkInTime, LocalDateTime checkOutTime) {
@@ -55,7 +55,7 @@ public class PaymentService {
             applyPenalty(userId, finalFare * 0.1);
         }
 
-        finalFare -= finalFare * METRO_CARD_DISCOUNT; // Apply discount for metro card users
+        finalFare -= finalFare * METRO_CARD_DISCOUNT;
 
         Payment payment = new Payment();
         payment.setUserId(userId);
@@ -63,9 +63,9 @@ public class PaymentService {
         payment.setAmount(finalFare);
         payment.setSource(sourceId);
         payment.setDestination(destinationId);
-        payment.setPaymentTime(LocalDateTime.now()); // Store the payment time
+        payment.setPaymentTime(LocalDateTime.now());
 
-        Payment savedPayment = paymentRepository.save(payment); // Persist to DB
+        Payment savedPayment = paymentRepository.save(payment);
 
         kafkaTemplate.send("ticket_payment_success", new PaymentSuccessEvent(userId, finalFare, "METRO_CARD", sourceId, destinationId));
         return savedPayment;
